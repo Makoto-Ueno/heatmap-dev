@@ -1,6 +1,14 @@
-import { FC, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { TbH1, TbH2, TbH3 } from 'react-icons/tb';
 import styles from './ToolbarPlugin.module.scss';
+import {
+  HeadingTagType,
+  $createHeadingNode,
+  $isHeadingNode,
+} from '@lexical/rich-text';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $getSelection, $isRangeSelection, $setSelection } from 'lexical';
+import { $setBlocksType } from '@lexical/selection';
 
 const SupportedBlockType = {
   paragraph: 'Paragraph',
@@ -15,6 +23,48 @@ type BlockType = keyof typeof SupportedBlockType;
 
 export const ToolbarPlugin: FC = () => {
   const [blockType, setBlockType] = useState<BlockType>('paragraph');
+  const [editor] = useLexicalComposerContext();
+
+  const formatHeading = useCallback(
+    (type: HeadingTagType) => {
+      if (blockType !== type) {
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            $setBlocksType(selection, () => $createHeadingNode(type));
+          }
+        });
+      }
+    },
+    [blockType, editor]
+  );
+
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) return;
+
+        const anchorNode = selection.anchor.getNode();
+        const targetNode =
+          anchorNode.getKey() === 'root'
+            ? anchorNode
+            : anchorNode.getTopLevelElementOrThrow();
+
+        if ($isHeadingNode(targetNode)) {
+          const tag = targetNode.getTag();
+          setBlockType(tag);
+        } else {
+          const nodeType = targetNode.getType();
+          if (nodeType in SupportedBlockType) {
+            setBlockType(nodeType as BlockType);
+          } else {
+            setBlockType('paragraph');
+          }
+        }
+      });
+    });
+  }, [editor]);
 
   return (
     <div className={styles.toolbar}>
@@ -24,6 +74,7 @@ export const ToolbarPlugin: FC = () => {
         title={SupportedBlockType['h1']}
         aria-label={SupportedBlockType['h1']}
         aria-checked={blockType === 'h1'}
+        onClick={() => formatHeading('h1')}
       >
         <TbH1 />
       </button>
@@ -33,6 +84,7 @@ export const ToolbarPlugin: FC = () => {
         title={SupportedBlockType['h2']}
         aria-label={SupportedBlockType['h2']}
         aria-checked={blockType === 'h2'}
+        onClick={() => formatHeading('h2')}
       >
         <TbH2 />
       </button>
@@ -42,6 +94,7 @@ export const ToolbarPlugin: FC = () => {
         title={SupportedBlockType['h3']}
         aria-label={SupportedBlockType['h3']}
         aria-checked={blockType === 'h3'}
+        onClick={() => formatHeading('h3')}
       >
         <TbH3 />
       </button>
