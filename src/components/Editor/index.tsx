@@ -8,6 +8,8 @@ import { AutoFocusPlugin } from '@/plugins/AutoFocusPlugin';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { nodes } from '@/nodes/nodes';
 import { ToolbarPlugin } from '@/plugins/ToolbarPlugin';
+import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { theme } from '../editorTheme/editorTheme';
 
 const initialConfig: ComponentProps<typeof LexicalComposer>['initialConfig'] = {
@@ -34,6 +36,8 @@ export const Editor: FC = () => {
       </div>
       <AutoFocusPlugin />
       <HistoryPlugin />
+      <ListPlugin />
+      <CheckListPlugin />
     </LexicalComposer>
   );
 };
