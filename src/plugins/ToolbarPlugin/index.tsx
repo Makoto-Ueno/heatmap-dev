@@ -5,6 +5,7 @@ import {
   MdFormatListBulleted,
   MdFormatListNumbered,
   MdChecklist,
+  MdCode,
 } from 'react-icons/md';
 import {
   $isListNode,
@@ -13,6 +14,11 @@ import {
   INSERT_UNORDERED_LIST_COMMAND,
   ListNode,
 } from '@lexical/list';
+import {
+  $createCodeNode,
+  $isCodeNode,
+  CODE_LANGUAGE_FRIENDLY_NAME_MAP,
+} from '@lexical/code';
 import styles from './ToolbarPlugin.module.scss';
 import {
   HeadingTagType,
@@ -37,6 +43,7 @@ const SupportedBlockType = {
   number: 'Numbered List',
   bullet: 'Bulleted List',
   check: 'Check List',
+  code: 'Code Block',
 } as const;
 type BlockType = keyof typeof SupportedBlockType;
 
@@ -84,6 +91,17 @@ export const ToolbarPlugin: FC = () => {
   const formatCheckList = useCallback(() => {
     if (blockType !== 'check') {
       editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
+    }
+  }, [blockType, editor]);
+
+  const formatCode = useCallback(() => {
+    if (blockType !== 'code') {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createCodeNode());
+        }
+      });
     }
   }, [blockType, editor]);
 
@@ -192,6 +210,16 @@ export const ToolbarPlugin: FC = () => {
         onClick={formatQuote}
       >
         <MdFormatQuote />
+      </button>
+      <button
+        type="button"
+        role="checkbox"
+        title={SupportedBlockType['code']}
+        aria-label={SupportedBlockType['code']}
+        aria-checked={blockType === 'code'}
+        onClick={formatCode}
+      >
+        <MdCode />
       </button>
     </div>
   );
