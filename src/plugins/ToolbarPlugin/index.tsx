@@ -6,6 +6,7 @@ import {
   MdFormatListNumbered,
   MdChecklist,
   MdCode,
+  MdExpandMore,
 } from 'react-icons/md';
 import {
   $isListNode,
@@ -30,6 +31,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $getSelection, $isRangeSelection } from 'lexical';
 import { $getNearestNodeOfType } from '@lexical/utils';
 import { $setBlocksType } from '@lexical/selection';
+import { CODE_LANGUAGE_COMMAND } from '../CodeHighlightPlugin';
 
 const SupportedBlockType = {
   paragraph: 'Paragraph',
@@ -47,9 +49,14 @@ const SupportedBlockType = {
 } as const;
 type BlockType = keyof typeof SupportedBlockType;
 
+const CodeLanguagesOptions = Object.entries(
+  CODE_LANGUAGE_FRIENDLY_NAME_MAP
+).map(([value, label]) => ({ value, label }));
+
 export const ToolbarPlugin: FC = () => {
   const [blockType, setBlockType] = useState<BlockType>('paragraph');
   const [editor] = useLexicalComposerContext();
+  const [codeLanguage, setCodeLanguage] = useState('');
 
   const formatHeading = useCallback(
     (type: HeadingTagType) => {
@@ -128,6 +135,9 @@ export const ToolbarPlugin: FC = () => {
 
           setBlockType(listType);
         } else {
+          if ($isCodeNode(targetNode)) {
+            setCodeLanguage(targetNode.getLanguage() || '');
+          }
           const nodeType = targetNode.getType();
           if (nodeType in SupportedBlockType) {
             setBlockType(nodeType as BlockType);
@@ -221,6 +231,25 @@ export const ToolbarPlugin: FC = () => {
       >
         <MdCode />
       </button>
+      {blockType === 'code' && (
+        <div className={styles.select}>
+          <select
+            aria-label="code languages"
+            value={codeLanguage}
+            onChange={(event) =>
+              editor.dispatchCommand(CODE_LANGUAGE_COMMAND, event.target.value)
+            }
+          >
+            <option value="">select...</option>
+            {CodeLanguagesOptions.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+          <MdExpandMore />
+        </div>
+      )}
     </div>
   );
 };
