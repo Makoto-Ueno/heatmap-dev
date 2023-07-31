@@ -12,6 +12,7 @@ import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { theme } from '../editorTheme/editorTheme';
 import { CodeHighlightPlugin } from '@/plugins/CodeHighlightPlugin';
+import { InlineToolbarPlugin } from '@/plugins/InlineToolbarPlugin';
 
 const initialConfig: ComponentProps<typeof LexicalComposer>['initialConfig'] = {
   namespace: 'MyEditor',
@@ -24,6 +25,7 @@ export const Editor: FC = () => {
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <ToolbarPlugin />
+      <InlineToolbarPlugin />
       <div className={styles.editorContainer}>
         <RichTextPlugin
           contentEditable={
