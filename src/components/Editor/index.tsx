@@ -13,6 +13,7 @@ import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { theme } from '../editorTheme/editorTheme';
 import { CodeHighlightPlugin } from '@/plugins/CodeHighlightPlugin';
 import { InlineToolbarPlugin } from '@/plugins/InlineToolbarPlugin';
+import { MarkdownPlugin } from '@/plugins/MarkdownPlugin';
 
 const initialConfig: ComponentProps<typeof LexicalComposer>['initialConfig'] = {
   namespace: 'MyEditor',
@@ -42,6 +43,7 @@ export const Editor: FC = () => {
       <ListPlugin />
       <CheckListPlugin />
       <CodeHighlightPlugin />
+      <MarkdownPlugin />
     </LexicalComposer>
   );
 };
